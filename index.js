@@ -159,7 +159,7 @@ async function run() {
             const limit = Math.max(1, parseInt(req.query.limit) || 10);
             const hrEmail = req.query.hrEmail;
 
-            let filter = {}
+            let filter = {};
 
             if (page && limit && hrEmail) {
                 filter = { hrEmail }
