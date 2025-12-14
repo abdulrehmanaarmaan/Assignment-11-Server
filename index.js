@@ -23,7 +23,7 @@ admin.initializeApp({
 const verifyFBToken = async (req, res, next) => {
     const token = req?.headers?.authorization;
 
-    // console.log(token
+    // console.log(token)
 
     if (!token) {
         return res.status(401).send({ message: 'unauthorized access' })
@@ -254,7 +254,7 @@ async function run() {
         app.get('/requests', verifyFBToken, async (req, res) => {
             const { assetId, hrEmail, requesterEmail } = req.query;
 
-            let query = {};
+            let query = {}
 
             if (assetId) {
                 query = { assetId }
