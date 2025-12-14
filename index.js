@@ -3,7 +3,7 @@ const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 5550
 require('dotenv').config()
-const stripe = require('stripe')(process.env.STRIPE_SECRET)
+const stripe = require('stripe')(process.env.STRIPE_SECRET);
 app.use(cors())
 app.use(express.json())
 
@@ -23,7 +23,7 @@ admin.initializeApp({
 const verifyFBToken = async (req, res, next) => {
     const token = req?.headers?.authorization;
 
-    // console.log(token)
+    // console.log(token
 
     if (!token) {
         return res.status(401).send({ message: 'unauthorized access' })
