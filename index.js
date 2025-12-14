@@ -64,7 +64,7 @@ async function run() {
         const requestsCollection = database.collection('requests');
         const assignedAssetsCollection = database.collection('assigned-assets');
         const affiliationsCollection = database.collection('affiliations');
-        const packagesCollection = database.collection('packages')
+        const packagesCollection = database.collection('packages');
         const paymentsCollection = database.collection('payments')
 
         paymentsCollection.createIndex(
@@ -166,7 +166,7 @@ async function run() {
                 const skip = (page - 1) * limit;
                 const total = await assetsCollection.countDocuments(filter);
                 const assets = await assetsCollection.find(filter).sort({ dateAdded: -1 }).skip(skip).limit(limit).toArray();
-                return res.send({ data: assets, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } })
+                return res.send({ data: assets, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } });
             }
 
             else {
