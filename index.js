@@ -204,7 +204,7 @@ async function run() {
                     }
                 }
             }
-
+            console.log(updatedInfo)
             const result = await assetsCollection.updateOne(query, updatedInfo);
             res.send(result)
         })
@@ -286,7 +286,7 @@ async function run() {
             const { requestStatus, approvalDate } = req.body
             const { id } = req.query
 
-            const query = { assetId: id }
+            const query = { _id: new ObjectId(id) }
 
             const updatedStatus = {
                 $set: {
@@ -295,7 +295,9 @@ async function run() {
                 }
             }
 
+            console.log('updated data', updatedStatus)
             const result = await requestsCollection.updateOne(query, updatedStatus)
+            console.log('after patch', result)
             res.send(result)
         })
 
@@ -355,6 +357,7 @@ async function run() {
             const query = { employeeEmail, hrEmail }
 
             const existingAffiliation = await affiliationsCollection.findOne(query);
+            console.log(existingAffiliation)
             if (existingAffiliation) {
                 return res.status(409).send({ message: 'affiliation already exists' })
             }
@@ -364,14 +367,17 @@ async function run() {
         })
 
         app.get('/assigned-assets', verifyFBToken, async (req, res) => {
-            const { searchAsset } = req.query
+            const { employeeEmail, searchAsset } = req.query;
 
-            const query = {}
+            let query = {};
+
+            if (employeeEmail) {
+                query.employeeEmail = employeeEmail
+            }
 
             if (searchAsset) {
-                query.$or = [
-                    { assetName: { $regex: searchAsset, $options: 'i' } }
-                ]
+                query.assetName = { $regex: searchAsset, $options: 'i' }
+
             }
 
             const result = await assignedAssetsCollection.find(query).toArray();
@@ -393,7 +399,7 @@ async function run() {
             res.send(result)
         })
 
-        app.patch('/requests', verifyFBToken, verifyEmployee, async (req, res) => {
+        app.patch('/employee/requests', verifyFBToken, verifyEmployee, async (req, res) => {
             const { assetId, requesterEmail } = req.query;
 
             const query = { assetId, requesterEmail }
@@ -441,7 +447,7 @@ async function run() {
             res.send(result)
         })
 
-        app.post('/create-checkout-session', async (req, res) => {
+        app.post('/create-checkout-session', verifyFBToken, verifyHR, async (req, res) => {
             const paymentInfo = req?.body;
             // console.log(paymentInfo?.amount)
             const amount = parseInt(paymentInfo?.amount) * 100;
@@ -531,8 +537,10 @@ async function run() {
                     status: 'completed'
                 };
 
+                console.log(payment)
                 try {
-                    await paymentsCollection.insertOne(payment);
+                    const result = await paymentsCollection.insertOne(payment);
+                    console.log(result)
                 } catch (error) {
                     if (error.code === 11000) {
                         return res.send({
@@ -543,16 +551,21 @@ async function run() {
                     }
                     throw error;
                 }
-                const updatedPackage = await packagesCollection.findOneAndUpdate(
-                    { name: session.metadata.packageName },
-                    { $inc: { employeeLimit: 1 } },
+                const updatedPackageLimit = await usersCollection.findOneAndUpdate(
+                    { email: session?.metadata?.hrEmail },
+                    {
+                        $set: {
+                            packageLimit: session?.metadata?.employeeLimit,
+                            subscription: session?.metadata?.packageName
+                        }
+                    },
                     { returnDocument: 'after' }
                 );
 
                 res.send({
                     success: true,
                     transactionId,
-                    updatedPackage
+                    updatedPackageLimit
                 });
 
             } catch (error) {
@@ -614,6 +627,8 @@ async function run() {
             const email = req.decoded_email
 
             const history = await paymentsCollection.find({ hrEmail: email }).sort({ paymentDate: -1 }).toArray()
+
+            console.log(history)
 
             res.send(history)
         })
