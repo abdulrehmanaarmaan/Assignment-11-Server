@@ -111,7 +111,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/users', verifyFBToken, async (req, res) => {
+        app.get('/users', async (req, res) => {
             const { email, role } = req.query;
 
             let query = {};
