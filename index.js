@@ -111,10 +111,10 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/users', async (req, res) => {
+        app.get('/users', verifyFBToken, async (req, res) => {
             const { email, role } = req.query;
 
-            const query = {};
+            let query = {};
 
             if (email) {
                 query.email = email
@@ -341,14 +341,12 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/users/:email', verifyFBToken, verifyHR, async (req, res) => {
-            const email = req.params.email;
-
-            const query = { email: email };
-
-            const result = await usersCollection.findOne(query);
-            res.send(result)
-        })
+        // app.get('/users/:email', verifyFBToken, verifyHR, async (req, res) => {
+        // const email = req.params.email;
+        // const query = { email: email };
+        // const result = await usersCollection.findOne(query);
+        // res.send(result)
+        // })
 
         app.post('/affiliations', verifyFBToken, verifyHR, async (req, res) => {
             const affiliation = req.body
