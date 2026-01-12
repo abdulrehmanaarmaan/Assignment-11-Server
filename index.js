@@ -103,12 +103,16 @@ async function run() {
             const query = { email };
 
             const existingUser = await usersCollection.findOne(query);
+            console.log(existingUser)
+
             if (existingUser) {
-                res.status(409).send({ message: 'user already exists' })
+                return res.status(409).send({ message: 'user already exists' })
             }
 
-            const result = await usersCollection.insertOne(user)
-            res.send(result)
+            else {
+                const result = await usersCollection.insertOne(user)
+                return res.send(result)
+            }
         })
 
         app.get('/users', async (req, res) => {
@@ -147,12 +151,6 @@ async function run() {
             const result = await assetsCollection.insertOne(asset);
             res.send(result)
         })
-
-        // app.get('/assets', verifyFBToken, async (req, res) => {
-        // const { page, limit } = req.query;
-        // const result = await assetsCollection.find({}).toArray();
-        // res.send(result)
-        // })
 
         app.get('/assets', verifyFBToken, async (req, res) => {
             const page = Math.max(1, parseInt(req.query.page) || 1);
@@ -332,7 +330,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/assets/:id', verifyFBToken, verifyHR, async (req, res) => {
+        app.get('/assets/:id', verifyFBToken, async (req, res) => {
             const id = req.params.id
 
             const query = { _id: new ObjectId(id) }
@@ -340,13 +338,6 @@ async function run() {
             const result = await assetsCollection.findOne(query);
             res.send(result)
         })
-
-        // app.get('/users/:email', verifyFBToken, verifyHR, async (req, res) => {
-        // const email = req.params.email;
-        // const query = { email: email };
-        // const result = await usersCollection.findOne(query);
-        // res.send(result)
-        // })
 
         app.post('/affiliations', verifyFBToken, verifyHR, async (req, res) => {
             const affiliation = req.body
@@ -670,7 +661,7 @@ async function run() {
             res.send(result)
         })
 
-        app.patch('/users', verifyFBToken, verifyEmployee, async (req, res) => {
+        app.patch('/users', verifyFBToken, async (req, res) => {
             const { name, profileImage } = req.body
             const { email } = req.query
             console.log(name, profileImage)
